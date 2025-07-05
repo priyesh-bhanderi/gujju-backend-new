@@ -1,9 +1,6 @@
-import fetch from 'node-fetch';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-
-globalThis.fetch = fetch;
 
 const firebaseConfig = {
   apiKey: "AIzaSyCyb126_Edbh4A77jqQV9k0oWqgD_RQPjg",

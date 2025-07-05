@@ -1,72 +1,78 @@
-// import express from 'express';
-// import multer from 'multer';
-// import { db } from '../src/firebaseAdmin.js';
-// import { sendResponse } from '../utils/response.js';
+import express from 'express';
+import multer from 'multer';
+import { sendResponse } from '../utils/response.js';
+import { db } from '../src/firebaseClient.js';
 
-// const router = express.Router();
+import { collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
 
-// // Set up multer storage
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, 'assets/');
-//     },
-//     filename: function (req, file, cb) {
-//         const uniqueName = Date.now() + '-' + file.originalname;
-//         cb(null, uniqueName);
-//     },
-// });
+const router = express.Router();
 
-// const upload = multer({ storage });
+// Set up multer storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'assets/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' + file.originalname;
+        cb(null, uniqueName);
+    },
+});
 
-// // POST /add (with image upload)
-// router.post('/add', upload.single('image'), async (req, res) => {
-//     const { title, description, tech, url } = req.body;
-//     const file = req.file;
+const upload = multer({ storage });
 
-//     if (!file) {
-//         return sendResponse(res, false, 'Image file is required');
-//     }
+// POST /add (with image upload)
+router.post('/add', upload.single('image'), async (req, res) => {
+    const { title, description, tech, url } = req.body;
+    const file = req.file;
 
-//     try {
-//         const newCtg = {
-//             image: file.filename, // Just store file name or full relative path if needed
-//             title,
-//             description,
-//             tech,
-//             url,
-//             createdAt: new Date().toISOString(),
-//         };
+    if (!file) {
+        return sendResponse(res, false, 'Image file is required');
+    }
 
-//         const docRef = await db.collection('categories').add(newCtg);
+    try {
+        const newCtg = {
+            image: file.filename,
+            title,
+            description,
+            tech,
+            url,
+            createdAt: new Date().toISOString(),
+        };
 
-//         return sendResponse(res, 'Category added', true, {
-//             docId: docRef.id,
-//             ...newCtg,
-//         });
-//     } catch (e) {
-//         return sendResponse(res, e.message, false,);
-//     }
-// });
+        const docRef = await addDoc(collection(db, 'categories'), newCtg);
 
-// router.get('/list', async (req, res) => {
-//     try {
-//         const snapshot = await db.collection('categories').orderBy('createdAt', 'desc').get();
+        return sendResponse(res, 'Category added', true, {
+            docId: docRef.id,
+            ...newCtg,
+        });
+    } catch (e) {
+        console.error('Error adding category:', e);
+        return sendResponse(res, e.message, false);
+    }
+});
 
-//         const categories = snapshot.docs.map(doc => {
-//             const data = doc.data();
-//             return {
-//                 id: doc.id,
-//                 ...data,
-//                 imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
-//             };
-//         });
-//         return sendResponse(res, 'Categories fetched successfully', true, {
-//             categories
-//         });
-//     } catch (e) {
-//         return sendResponse(res, e.message, false,);
-//     }
-    
-// });
+// GET /list
+router.get('/list', async (req, res) => {
+    try {
+        const q = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
 
-// export default router;
+        const categories = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
+            };
+        });
+
+        return sendResponse(res, 'Categories fetched successfully', true, {
+            categories
+        });
+    } catch (e) {
+        console.error('Error fetching categories:', e);
+        return sendResponse(res, e.message, false);
+    }
+});
+
+export default router;

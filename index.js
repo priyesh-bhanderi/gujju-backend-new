@@ -1,7 +1,7 @@
 import express from 'express';
 import index from './routers/index.js';
 import auth from './routers/auth.js';
-// import categories from './routers/categories.js';
+import categories from './routers/categories.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.use('/', index);
 app.use('/api/auth', auth);
-// app.use('/api/categories', categories);
+app.use('/api/categories', categories);
 
 
 // Start server

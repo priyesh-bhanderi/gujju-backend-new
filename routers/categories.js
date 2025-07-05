@@ -5,7 +5,7 @@ import { db } from '../src/firebaseClient.js';
 import path from 'path';
 import fs from 'fs/promises';
 
-import { collection, addDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, orderBy, query, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { deleteDocWithImage } from '../utils/deleteDocWithImage.js';
 
 const router = express.Router();
@@ -64,6 +64,62 @@ router.post('/add', upload.single('image'), async (req, res) => {
             image: newFileName,
         });
     } catch (e) {
+        return sendResponse(res, e.message, false);
+    }
+});
+
+router.post('/update/:id', upload.single('image'), async (req, res) => {
+    const { id } = req.params;
+    const { title, description, tech, url } = req.body;
+    const file = req.file;
+
+    try {
+        const docRef = doc(db, 'categories', id);
+        const snapshot = await getDoc(docRef);
+
+        if (!snapshot.exists()) {
+            return sendResponse(res, false, 'Document not found');
+        }
+
+        const existingData = snapshot.data();
+        const updates = {
+            title,
+            description,
+            tech,
+            url,
+        };
+
+        if (file) {
+            // Remove old image
+            if (existingData.image) {
+                const oldImagePath = path.join('assets', existingData.image);
+                try {
+                    await fs.unlink(oldImagePath);
+                } catch (err) {
+                    console.warn('Old image not found or already deleted');
+                }
+            }
+
+            // Rename new image to doc ID
+            const ext = path.extname(file.originalname);
+            const newFileName = `${id}${ext}`;
+            const newFilePath = path.join('assets', newFileName);
+
+            await fs.rename(file.path, newFilePath);
+            updates.image = newFileName;
+        }
+
+        await updateDoc(docRef, updates);
+
+        return sendResponse(res, 'Category updated successfully', true, {
+            id,
+            ...existingData,
+            ...updates,
+            image: updates.image || existingData.image,
+            imageUrl: `${req.protocol}://${req.get('host')}/assets/${updates.image || existingData.image}`,
+        });
+    } catch (e) {
+        console.error('Error updating category:', e);
         return sendResponse(res, e.message, false);
     }
 });

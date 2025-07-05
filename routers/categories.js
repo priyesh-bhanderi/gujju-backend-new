@@ -2,8 +2,10 @@ import express from 'express';
 import multer from 'multer';
 import { sendResponse } from '../utils/response.js';
 import { db } from '../src/firebaseClient.js';
+import path from 'path';
+import fs from 'fs/promises';
 
-import { collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, addDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
 
 const router = express.Router();
 
@@ -30,8 +32,12 @@ router.post('/add', upload.single('image'), async (req, res) => {
     }
 
     try {
+        const ext = path.extname(file.originalname); // Keep original file extension
+        const tempPath = file.path;
+        
+        // 1. Create document with temporary image name
         const newCtg = {
-            image: file.filename,
+            image: file.filename, // temporary name for now
             title,
             description,
             tech,
@@ -40,13 +46,23 @@ router.post('/add', upload.single('image'), async (req, res) => {
         };
 
         const docRef = await addDoc(collection(db, 'categories'), newCtg);
+        const docId = docRef.id;
+
+        // 2. Rename image file to docId
+        const newFileName = `${docId}${ext}`;
+        const newFilePath = path.join('assets', newFileName);
+
+        await fs.rename(tempPath, newFilePath);
+
+        // 3. Update Firestore document with new image name
+        await updateDoc(docRef, { image: newFileName });
 
         return sendResponse(res, 'Category added', true, {
-            docId: docRef.id,
+            docId,
             ...newCtg,
+            image: newFileName,
         });
     } catch (e) {
-        console.error('Error adding category:', e);
         return sendResponse(res, e.message, false);
     }
 });

@@ -59,7 +59,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
         await updateDoc(docRef, { image: newFileName });
 
         return sendResponse(res, 'Category added', true, {
-            id:docId,
+            id: docId,
             ...newCtg,
             image: newFileName,
         });
@@ -74,7 +74,7 @@ router.get('/list', async (req, res) => {
         const q = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
-        if(snapshot.docs.length > 0 ){
+        if (snapshot.docs.length > 0) {
             const categories = snapshot.docs.map(doc => {
                 const data = doc.data();
                 return {
@@ -84,8 +84,8 @@ router.get('/list', async (req, res) => {
                 };
             });
             return sendResponse(res, 'Categories fetched successfully', true, categories);
-        }else{
-            return sendResponse(res, 'Categories Not Available', true);
+        } else {
+            return sendResponse(res, 'Categories Not Available', true, categories);
         }
 
     } catch (e) {
@@ -97,8 +97,8 @@ router.get('/list', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params;
 
-   const result =await deleteDocWithImage('categories', id);
-   return sendResponse(res, result.message, result.status);
+    const result = await deleteDocWithImage('categories', id);
+    return sendResponse(res, result.message, result.status);
 
 });
 

@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs/promises';
 
 import { collection, addDoc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import { deleteDocWithImage } from '../utils/deleteDocWithImage.js';
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
     try {
         const ext = path.extname(file.originalname); // Keep original file extension
         const tempPath = file.path;
-        
+
         // 1. Create document with temporary image name
         const newCtg = {
             image: file.filename, // temporary name for now
@@ -58,7 +59,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
         await updateDoc(docRef, { image: newFileName });
 
         return sendResponse(res, 'Category added', true, {
-            docId,
+            id:docId,
             ...newCtg,
             image: newFileName,
         });
@@ -73,22 +74,32 @@ router.get('/list', async (req, res) => {
         const q = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
-        const categories = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
-            };
-        });
+        if(snapshot.docs.length > 0 ){
+            const categories = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
+                };
+            });
+            return sendResponse(res, 'Categories fetched successfully', true, categories);
+        }else{
+            return sendResponse(res, 'Categories Not Available', true);
+        }
 
-        return sendResponse(res, 'Categories fetched successfully', true, {
-            categories
-        });
     } catch (e) {
         console.error('Error fetching categories:', e);
         return sendResponse(res, e.message, false);
     }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+    const { id } = req.params;
+
+   const result =await deleteDocWithImage('categories', id);
+   return sendResponse(res, result.message, result.status);
+
 });
 
 export default router;

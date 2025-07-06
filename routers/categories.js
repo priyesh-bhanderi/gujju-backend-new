@@ -130,15 +130,15 @@ router.get('/list', async (req, res) => {
         const q = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
+        const categories = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
+            };
+        });
         if (snapshot.docs.length > 0) {
-            const categories = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
-                };
-            });
             return sendResponse(res, 'Categories fetched successfully', true, categories);
         } else {
             return sendResponse(res, 'Categories Not Available', true, categories);

@@ -25,7 +25,7 @@ const upload = multer({ storage });
 
 // POST /add (with image upload)
 router.post('/add', upload.single('image'), async (req, res) => {
-    const { title, description, tech, url } = req.body;
+    const { title, category,description, tools, link } = req.body;
     const file = req.file;
 
     if (!file) {
@@ -40,9 +40,10 @@ router.post('/add', upload.single('image'), async (req, res) => {
         const newCtg = {
             image: file.filename, // temporary name for now
             title,
+            category,
             description,
-            tech,
-            url,
+            tools,
+            link,
             createdAt: new Date().toISOString(),
         };
 
@@ -70,7 +71,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
 
 router.post('/update/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
-    const { title, description, tech, url } = req.body;
+    const { title,category, description, tools, link } = req.body;
     const file = req.file;
 
     try {
@@ -84,9 +85,10 @@ router.post('/update/:id', upload.single('image'), async (req, res) => {
         const existingData = snapshot.data();
         const updates = {
             title,
+            category,
             description,
-            tech,
-            url,
+            tools,
+            link,
         };
 
         if (file) {

@@ -4,7 +4,11 @@ import { sendResponse } from '../utils/response.js';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
 import { verifyToken } from '../middleware/authMiddleware.js';
-const JWT_SECRET = process.env.JWT_SECRET || '03e227e9cc057046222bd5c0956ea22662ea91caedd7a47aa46324135a070f76';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const router = express.Router();
 
@@ -86,7 +90,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/profile', verifyToken, async (req, res) => {
+router.get('/profile', async (req, res) => {
+  console.log(JWT_SECRET)
   return sendResponse(res, 'Profile fetched', true);
 });
 

@@ -1,7 +1,11 @@
 // middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+dotenv.config();
+
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;

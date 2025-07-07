@@ -7,8 +7,11 @@ import fs from 'fs/promises';
 
 import { collection, addDoc, getDocs, orderBy, query, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { deleteDocWithImage } from '../utils/deleteDocWithImage.js';
+import { verifyToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
+
+const collectionName = 'projects';
 
 // Set up multer storage
 const storage = multer.diskStorage({
@@ -24,7 +27,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /add (with image upload)
-router.post('/add', upload.single('image'), async (req, res) => {
+router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     const { title, category, description, tools, link, status } = req.body;
     const file = req.file;
 
@@ -48,7 +51,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
             createdAt: new Date().toISOString(),
         };
 
-        const docRef = await addDoc(collection(db, 'projects'), newCtg);
+        const docRef = await addDoc(collection(db, collectionName), newCtg);
         const docId = docRef.id;
 
         // 2. Rename image file to docId
@@ -70,13 +73,13 @@ router.post('/add', upload.single('image'), async (req, res) => {
     }
 });
 
-router.post('/update/:id', upload.single('image'), async (req, res) => {
+router.post('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
     const { id } = req.params;
-    const { title, category, description, tools, link,} = req.body;
+    const { title, category, description, tools, link, } = req.body;
     const file = req.file;
 
     try {
-        const docRef = doc(db, 'projects', id);
+        const docRef = doc(db, collectionName, id);
         const snapshot = await getDoc(docRef);
 
         if (!snapshot.exists()) {
@@ -128,9 +131,9 @@ router.post('/update/:id', upload.single('image'), async (req, res) => {
 });
 
 // GET /list
-router.get('/list', async (req, res) => {
+router.get('/list', verifyToken, async (req, res) => {
     try {
-        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
         const projects = snapshot.docs.map(doc => {
@@ -152,11 +155,29 @@ router.get('/list', async (req, res) => {
     }
 });
 
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
-    const result = await deleteDocWithImage('projects', id);
+    const result = await deleteDocWithImage(collectionName, id);
     return sendResponse(res, result.message, result.status);
 
 });
+
+router.post('/update-status/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+
+        const updates = {
+            ...req.body
+        };
+
+        const docRef = doc(db, collectionName, id);
+        await updateDoc(docRef, updates);
+        return sendResponse(res, 'api', true, req.body);
+    } catch (error) {
+        console.log(error)
+        return sendResponse(res, 'true', false, error);
+    }
+})
+
 
 export default router;

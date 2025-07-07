@@ -48,7 +48,7 @@ router.post('/update/:id', async (req, res) => {
 
         const docRef = doc(db, collectionName, id);
         await updateDoc(docRef, updates);
-        return sendResponse(res, 'true', true, req.body);
+        return sendResponse(res, 'API Update SuccessFully', true, req.body);
     } catch (error) {
         console.log(error)
         return sendResponse(res, 'true', false, error);

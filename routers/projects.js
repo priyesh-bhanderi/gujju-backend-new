@@ -155,7 +155,8 @@ router.get('/list', async (req, res) => {
     }
 });
 
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id'
+    , async (req, res) => {
     const { id } = req.params;
     const result = await deleteDocWithImage(collectionName, id);
     return sendResponse(res, result.message, result.status);

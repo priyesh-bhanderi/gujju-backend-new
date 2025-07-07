@@ -74,6 +74,12 @@ router.post('/login', async (req, res) => {
     if (user.password !== password) {
       return sendResponse(res, 'Invalid email or password', false);
     }
+
+    if (!JWT_SECRET) {
+      console.error('❌ JWT_SECRET is missing in environment variables.');
+      process.exit(1); // stop server if it's critical
+    }
+
     const token = jwt.sign({ id: userDoc.id, email }, JWT_SECRET, { expiresIn: '7d' });
 
     // return sendResponse(res, 'Login successful', true, {
@@ -84,8 +90,8 @@ router.post('/login', async (req, res) => {
     // });
 
     return res.status(200).json({
-            user
-        });
+      user
+    });
 
   } catch (error) {
     return sendResponse(res, error.message, false);

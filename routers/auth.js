@@ -3,6 +3,7 @@ import { db } from '../src/firebaseClient.js';
 import { sendResponse } from '../utils/response.js';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
+import { verifyToken } from '../middleware/authMiddleware.js';
 const JWT_SECRET = process.env.JWT_SECRET || '03e227e9cc057046222bd5c0956ea22662ea91caedd7a47aa46324135a070f76';
 
 const router = express.Router();
@@ -75,6 +76,7 @@ router.post('/login', async (req, res) => {
     return sendResponse(res, 'Login successful', true, {
       id: userDoc.id,
       email: user.email,
+      role:'admin',
       token
     });
 
@@ -82,6 +84,11 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', error);
     return sendResponse(res, error.message, false);
   }
+});
+
+router.get('/profile', verifyToken, async (req, res) => {
+  const userId = req.user.id;
+  return sendResponse(res, 'Profile fetched', true, { userId, email: req.user.email });
 });
 
 export default router;

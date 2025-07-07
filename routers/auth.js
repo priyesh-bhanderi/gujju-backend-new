@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
     return sendResponse(res, 'Login successful', true, {
       id: userDoc.id,
       email: user.email,
-      role:'admin',
+      // role:'admin',
       token
     });
 
@@ -87,8 +87,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/profile', verifyToken, async (req, res) => {
-  const userId = req.user.id;
-  return sendResponse(res, 'Profile fetched', true, { userId, email: req.user.email });
+  return sendResponse(res, 'Profile fetched', true);
 });
 
 export default router;

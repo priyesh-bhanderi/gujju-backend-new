@@ -74,7 +74,7 @@ router.post('/login', async (req, res) => {
     if (user.password !== password) {
       return sendResponse(res, 'Invalid email or password', false);
     }
-
+console.log(JWT_SECRET)
     const token = jwt.sign({ id: userDoc.id, email }, JWT_SECRET, { expiresIn: '7d' });
 
     return sendResponse(res, 'Login successful', true, {

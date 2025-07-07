@@ -31,7 +31,7 @@ router.post('/signup', async (req, res) => {
     const docRef = await addDoc(usersRef, newUser);
 
     return sendResponse(res, 'User added successfully', true, {
-      docId: docRef.id,
+      id: docRef.id,
       ...newUser
     });
 
@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
     }
 
     return sendResponse(res, 'Login successful', true, {
-      docId: userDoc.id,
+      id: userDoc.id,
       email: user.email,
       createdAt: user.createdAt
     });

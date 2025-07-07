@@ -3,7 +3,8 @@ import index from './routers/index.js';
 import auth from './routers/auth.js';
 import categories from './routers/categories.js';
 import dotenv from 'dotenv';
-import cors from 'cors'
+import cors from 'cors';
+import apis from './routers/apis.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use('/', index);
 app.use('/api/auth', auth);
 app.use('/api/categories', categories);
+app.use('/api/all', apis);
 
 
 // Start server

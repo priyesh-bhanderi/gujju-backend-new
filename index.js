@@ -11,11 +11,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
-  origin: '*', // Allow requests from this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
-  allowedHeaders: ['Content-Type'], // Allow these headers
-}));
+app.use(cors());
+
+// app.use(cors({
+//   origin: '*', 
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+//   allowedHeaders: ['Content-Type'],
+// }));
 
 // Middleware
 app.use(express.json());

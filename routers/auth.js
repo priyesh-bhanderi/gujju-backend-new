@@ -85,7 +85,7 @@ router.post('/login', async (req, res) => {
     return sendResponse(res, 'Login successful', true, {
       id: userDoc.id,
       email: user.email,
-      // role:'admin',
+      role:'admin',
       token
     });
 

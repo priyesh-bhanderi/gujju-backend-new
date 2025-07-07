@@ -25,7 +25,7 @@ const upload = multer({ storage });
 
 // POST /add (with image upload)
 router.post('/add', upload.single('image'), async (req, res) => {
-    const { title, category,description, tools, link } = req.body;
+    const { title, category, description, tools, link, status } = req.body;
     const file = req.file;
 
     if (!file) {
@@ -44,10 +44,11 @@ router.post('/add', upload.single('image'), async (req, res) => {
             description,
             tools,
             link,
+            status,
             createdAt: new Date().toISOString(),
         };
 
-        const docRef = await addDoc(collection(db, 'categories'), newCtg);
+        const docRef = await addDoc(collection(db, 'projects'), newCtg);
         const docId = docRef.id;
 
         // 2. Rename image file to docId
@@ -59,7 +60,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
         // 3. Update Firestore document with new image name
         await updateDoc(docRef, { image: newFileName });
 
-        return sendResponse(res, 'Category added', true, {
+        return sendResponse(res, 'Project added', true, {
             id: docId,
             ...newCtg,
             image: newFileName,
@@ -71,11 +72,11 @@ router.post('/add', upload.single('image'), async (req, res) => {
 
 router.post('/update/:id', upload.single('image'), async (req, res) => {
     const { id } = req.params;
-    const { title,category, description, tools, link } = req.body;
+    const { title, category, description, tools, link,} = req.body;
     const file = req.file;
 
     try {
-        const docRef = doc(db, 'categories', id);
+        const docRef = doc(db, 'projects', id);
         const snapshot = await getDoc(docRef);
 
         if (!snapshot.exists()) {
@@ -113,7 +114,7 @@ router.post('/update/:id', upload.single('image'), async (req, res) => {
 
         await updateDoc(docRef, updates);
 
-        return sendResponse(res, 'Category updated successfully', true, {
+        return sendResponse(res, 'Project updated successfully', true, {
             id,
             ...existingData,
             ...updates,
@@ -129,10 +130,10 @@ router.post('/update/:id', upload.single('image'), async (req, res) => {
 // GET /list
 router.get('/list', async (req, res) => {
     try {
-        const q = query(collection(db, 'categories'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'projects'), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
-        const categories = snapshot.docs.map(doc => {
+        const projects = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
                 id: doc.id,
@@ -141,21 +142,19 @@ router.get('/list', async (req, res) => {
             };
         });
         if (snapshot.docs.length > 0) {
-            return sendResponse(res, 'Categories fetched successfully', true, categories);
+            return sendResponse(res, 'Projects fetched successfully', true, projects);
         } else {
-            return sendResponse(res, 'Categories Not Available', true, categories);
+            return sendResponse(res, 'Projects Not Available', true, projects);
         }
 
     } catch (e) {
-        console.error('Error fetching categories:', e);
         return sendResponse(res, e.message, false);
     }
 });
 
 router.delete('/delete/:id', async (req, res) => {
     const { id } = req.params;
-
-    const result = await deleteDocWithImage('categories', id);
+    const result = await deleteDocWithImage('projects', id);
     return sendResponse(res, result.message, result.status);
 
 });

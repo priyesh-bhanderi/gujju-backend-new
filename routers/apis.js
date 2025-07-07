@@ -1,11 +1,12 @@
 import exprees from 'express';
 import { sendResponse } from '../utils/response.js';
 import { db } from '../src/firebaseClient.js';
-import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, updateDoc } from 'firebase/firestore';
 
 const router = exprees.Router();
 
 const idData = 'priyesh-bhautik';
+const collectionName = 'apis'
 
 router.post('/add/:id', async (req, res) => {
     const { id } = req.params;
@@ -18,10 +19,8 @@ router.post('/add/:id', async (req, res) => {
             const addedDocs = [];
 
             for (const api of apis) {
-                const { name } = api;
 
-                // Reference: /users/:idData/apis/:name
-                const apiDocRef = doc(collection(db, `apis`));
+                const apiDocRef = doc(collection(db, collectionName));
                 await setDoc(apiDocRef, api);
 
                 addedDocs.push({
@@ -39,12 +38,29 @@ router.post('/add/:id', async (req, res) => {
     }
 })
 
+router.post('/update/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+
+        const updates = {
+            ...req.body
+        };
+
+        const docRef = doc(db, collectionName, id);
+        await updateDoc(docRef, updates);
+        return sendResponse(res, 'true', true, req.body);
+    } catch (error) {
+        console.log(error)
+        return sendResponse(res, 'true', false, error);
+    }
+})
+
 router.get('/list/:id', async (req, res) => {
     const { id } = req.params;
     const url = `${req.protocol}://${req.get('host')}`
     if (id == idData) {
 
-        const apiCollectionRef = collection(db, `apis`);
+        const apiCollectionRef = collection(db, collectionName);
         const snapshot = await getDocs(apiCollectionRef);
 
         const groupedApis = {};

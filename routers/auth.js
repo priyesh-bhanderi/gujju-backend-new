@@ -84,7 +84,7 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    return sendResponse(res, {...error}, false);
+    return sendResponse(res, error.message, false);
   }
 });
 

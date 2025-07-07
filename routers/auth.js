@@ -2,6 +2,8 @@ import express from 'express';
 import { db } from '../src/firebaseClient.js';
 import { sendResponse } from '../utils/response.js';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+import jwt from 'jsonwebtoken';
+const JWT_SECRET = process.env.JWT_SECRET || '03e227e9cc057046222bd5c0956ea22662ea91caedd7a47aa46324135a070f76';
 
 const router = express.Router();
 
@@ -24,15 +26,18 @@ router.post('/signup', async (req, res) => {
 
     const newUser = {
       email,
-      password, // ⚠️ Plaintext! Use bcrypt in real apps
+      password, // ⚠️ still plaintext – hash this in real apps
       createdAt: new Date()
     };
 
     const docRef = await addDoc(usersRef, newUser);
 
+    const token = jwt.sign({ id: docRef.id, email }, JWT_SECRET, { expiresIn: '7d' });
+
     return sendResponse(res, 'User added successfully', true, {
       id: docRef.id,
-      ...newUser
+      email,
+      token
     });
 
   } catch (error) {
@@ -65,10 +70,12 @@ router.post('/login', async (req, res) => {
       return sendResponse(res, 'Invalid email or password', false);
     }
 
+    const token = jwt.sign({ id: userDoc.id, email }, JWT_SECRET, { expiresIn: '7d' });
+
     return sendResponse(res, 'Login successful', true, {
       id: userDoc.id,
       email: user.email,
-      createdAt: user.createdAt
+      token
     });
 
   } catch (error) {

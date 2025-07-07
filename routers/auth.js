@@ -90,7 +90,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/profile', async (req, res) => {
+router.get('/profile', verifyToken, async (req, res) => {
   console.log(JWT_SECRET)
   return sendResponse(res, 'Profile fetched', true);
 });

@@ -16,7 +16,7 @@ const collectionName = 'projects';
 // Set up multer storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'assets/');
+        cb(null, 'public/assets/');
     },
     filename: function (req, file, cb) {
         const uniqueName = Date.now() + '-' + file.originalname;
@@ -56,7 +56,7 @@ router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
 
         // 2. Rename image file to docId
         const newFileName = `${docId}${ext}`;
-        const newFilePath = path.join('assets', newFileName);
+        const newFilePath = path.join('public/assets', newFileName);
 
         await fs.rename(tempPath, newFilePath);
 
@@ -98,7 +98,7 @@ router.post('/update/:id', verifyToken, upload.single('image'), async (req, res)
         if (file) {
             // Remove old image
             if (existingData.image) {
-                const oldImagePath = path.join('assets', existingData.image);
+                const oldImagePath = path.join('public/assets', existingData.image);
                 try {
                     await fs.unlink(oldImagePath);
                 } catch (err) {

@@ -68,6 +68,7 @@ router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
             image: newFileName,
         });
     } catch (e) {
+        console.log(e)
         return sendResponse(res, e.message, false);
     }
 });

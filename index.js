@@ -1,6 +1,8 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
 
 global.__basedir = __dirname;
 const app = express();
@@ -15,12 +17,13 @@ const auth = require('./routers/auth');
 const projects = require('./routers/projects');
 const apis = require('./routers/apis');
 
-app.use("/assets", express.static(__dirname + "public/assets"));
 app.use('/', index);
 app.use('/api/auth', auth);
 app.use('/api/projects', projects);
 app.use('/api/all', apis);
+app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
+// console.log("Asset dir files:", fs.readdirSync(path.join(__dirname, "public", "assets")));
 
 // Start server
 app.listen(PORT, () => {

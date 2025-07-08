@@ -1,4 +1,4 @@
-export const sendResponse = (res, message, success, payload) => {
+const sendResponse = (res, message, success, payload) => {
     if (success) {
         return res.status(200).json({
             message: message,
@@ -12,3 +12,5 @@ export const sendResponse = (res, message, success, payload) => {
         });
     }
 };
+
+module.exports = { sendResponse };

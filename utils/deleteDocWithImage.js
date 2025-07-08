@@ -1,9 +1,9 @@
-import { doc, deleteDoc, getDoc } from 'firebase/firestore';
-import { db } from '../src/firebaseClient.js';
-import fs from 'fs/promises';
-import path from 'path';
+const { doc, deleteDoc, getDoc } = require('firebase/firestore');
+const { db } = require('../src/firebaseClient.js');
+const fs = require('fs/promises');
+const path = require('path');
 
-export const deleteDocWithImage = async (collectionName, docId) => {
+const deleteDocWithImage = async (collectionName, docId) => {
   try {
     // Step 1: Get document data
     const docRef = doc(db, collectionName, docId);
@@ -35,3 +35,5 @@ export const deleteDocWithImage = async (collectionName, docId) => {
     return { status: false, message: err.message };
   }
 };
+
+module.exports = { deleteDocWithImage };

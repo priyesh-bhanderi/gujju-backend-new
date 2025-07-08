@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /add (with image upload)
-router.post('/add', upload.single('image'), async (req, res) => {
+router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     const { title, category, description, tools, link, status } = req.body;
     const file = req.file;
 
@@ -73,7 +73,7 @@ router.post('/add', upload.single('image'), async (req, res) => {
     }
 });
 
-router.post('/update/:id', upload.single('image'), async (req, res) => {
+router.post('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
     const { id } = req.params;
     const { title, category, description, tools, link, } = req.body;
     const file = req.file;
@@ -131,7 +131,7 @@ router.post('/update/:id', upload.single('image'), async (req, res) => {
 });
 
 // GET /list
-router.get('/list', async (req, res) => {
+router.get('/list', verifyToken, async (req, res) => {
     try {
         const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
@@ -155,15 +155,15 @@ router.get('/list', async (req, res) => {
     }
 });
 
-router.delete('/delete/:id'
-    , async (req, res) => {
-    const { id } = req.params;
-    const result = await deleteDocWithImage(collectionName, id);
-    return sendResponse(res, result.message, result.status);
+router.delete('/delete/:id',
+    verifyToken, async (req, res) => {
+        const { id } = req.params;
+        const result = await deleteDocWithImage(collectionName, id);
+        return sendResponse(res, result.message, result.status);
 
-});
+    });
 
-router.post('/update-status/:id', async (req, res) => {
+router.post('/update-status/:id', verifyToken, async (req, res) => {
     const { id } = req.params;
     try {
 

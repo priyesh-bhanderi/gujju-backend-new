@@ -18,19 +18,14 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173", // or whatever your frontend is
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+app.use(cors());
 
 app.use('/', index);
 app.use('/api/auth', auth);
 app.use('/api/projects', projects);
 app.use('/api/all', apis);
 
-app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+// app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 // Start server
 app.listen(PORT, () => {

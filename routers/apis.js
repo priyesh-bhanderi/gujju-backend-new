@@ -1,12 +1,12 @@
-import exprees from 'express';
-import { sendResponse } from '../utils/response.js';
-import { db } from '../src/firebaseClient.js';
-import { collection, doc, setDoc, getDocs, updateDoc } from 'firebase/firestore';
+const express = require('express');
+const { sendResponse } = require('../utils/response.js');
+const { db } = require('../src/firebaseClient.js');
+const { collection, doc, setDoc, getDocs, updateDoc } = require('firebase/firestore');
 
-const router = exprees.Router();
+const router = express.Router();
 
 const idData = 'priyesh-bhautik';
-const collectionName = 'apis'
+const collectionName = 'apis';
 
 router.post('/add/:id', async (req, res) => {
     const { id } = req.params;
@@ -94,4 +94,4 @@ router.get('/list/:id', async (req, res) => {
     }
 })
 
-export default router;
+module.exports = router;

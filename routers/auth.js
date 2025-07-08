@@ -1,15 +1,12 @@
-import express from 'express';
-import { db } from '../src/firebaseClient.js';
-import { sendResponse } from '../utils/response.js';
-import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import jwt from 'jsonwebtoken';
-import { verifyToken } from '../middleware/authMiddleware.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
+const express = require("express");
+const { db } = require('../src/firebaseClient.js');
+const { sendResponse } = require('../utils/response.js');
+const { collection, query, where, getDocs, addDoc } = require('firebase/firestore');
+const { verifyToken } = require('../middleware/authMiddleware.js');
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
-
 const router = express.Router();
 
 // 🔐 Signup Route
@@ -99,4 +96,4 @@ router.get('/profile', verifyToken, async (req, res) => {
   return sendResponse(res, 'Profile fetched', true);
 });
 
-export default router;
+module.exports = router;

@@ -1,16 +1,15 @@
-import express from 'express';
-import multer from 'multer';
-import { sendResponse } from '../utils/response.js';
-import { db } from '../src/firebaseClient.js';
-import path from 'path';
-import fs from 'fs/promises';
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs/promises');
 
-import { collection, addDoc, getDocs, orderBy, query, updateDoc, doc, getDoc } from 'firebase/firestore';
-import { deleteDocWithImage } from '../utils/deleteDocWithImage.js';
-import { verifyToken } from '../middleware/authMiddleware.js';
+const { sendResponse } = require('../utils/response.js');
+const { db } = require('../src/firebaseClient.js');
+const { collection, addDoc, getDocs, orderBy, query, updateDoc, doc, getDoc } = require('firebase/firestore');
+const { deleteDocWithImage } = require('../utils/deleteDocWithImage.js');
+const { verifyToken } = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
-
 const collectionName = 'projects';
 
 // Set up multer storage
@@ -181,4 +180,4 @@ router.post('/update-status/:id', verifyToken, async (req, res) => {
 })
 
 
-export default router;
+module.exports = router;

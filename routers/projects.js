@@ -83,7 +83,7 @@ router.post('/update/:id', verifyToken, async (req, res) => {
 });
 
 // GET /list
-router.get('/list', verifyToken, async (req, res) => {
+router.get('/list', async (req, res) => {
     try {
         const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);

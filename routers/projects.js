@@ -12,35 +12,18 @@ const { verifyToken } = require('../middleware/authMiddleware.js');
 const router = express.Router();
 const collectionName = 'projects';
 
-// Set up multer storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/assets/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = Date.now() + '-' + file.originalname;
-        cb(null, uniqueName);
-    },
-});
-
-const upload = multer({ storage });
-
 // POST /add (with image upload)
-router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
-    const { title, category, description, tools, link, status } = req.body;
-    const file = req.file;
+router.post('/add', verifyToken, async (req, res) => {
+    const { title, category, description, tools, link, status, image } = req.body;
 
-    if (!file) {
+    if (!image) {
         return sendResponse(res, false, 'Image file is required');
     }
 
     try {
-        const ext = path.extname(file.originalname); // Keep original file extension
-        const tempPath = file.path;
 
-        // 1. Create document with temporary image name
         const newCtg = {
-            image: file.filename, // temporary name for now
+            image,
             title,
             category,
             description,
@@ -53,19 +36,9 @@ router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
         const docRef = await addDoc(collection(db, collectionName), newCtg);
         const docId = docRef.id;
 
-        // 2. Rename image file to docId
-        const newFileName = `${docId}${ext}`;
-        const newFilePath = path.join('public/assets', newFileName);
-
-        await fs.rename(tempPath, newFilePath);
-
-        // 3. Update Firestore document with new image name
-        await updateDoc(docRef, { image: newFileName });
-
         return sendResponse(res, 'Project added', true, {
             id: docId,
             ...newCtg,
-            image: newFileName,
         });
     } catch (e) {
         console.log(e)
@@ -73,10 +46,10 @@ router.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     }
 });
 
-router.post('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+router.post('/update/:id', verifyToken, async (req, res) => {
+
     const { id } = req.params;
-    const { title, category, description, tools, link, } = req.body;
-    const file = req.file;
+    const { title, category, description, tools, link, image } = req.body;
 
     try {
         const docRef = doc(db, collectionName, id);
@@ -93,27 +66,8 @@ router.post('/update/:id', verifyToken, upload.single('image'), async (req, res)
             description,
             tools,
             link,
+            image
         };
-
-        if (file) {
-            // Remove old image
-            if (existingData.image) {
-                const oldImagePath = path.join('public/assets', existingData.image);
-                try {
-                    await fs.unlink(oldImagePath);
-                } catch (err) {
-                    console.warn('Old image not found or already deleted');
-                }
-            }
-
-            // Rename new image to doc ID
-            const ext = path.extname(file.originalname);
-            const newFileName = `${id}${ext}`;
-            const newFilePath = path.join('assets', newFileName);
-
-            await fs.rename(file.path, newFilePath);
-            updates.image = newFileName;
-        }
 
         await updateDoc(docRef, updates);
 
@@ -121,8 +75,6 @@ router.post('/update/:id', verifyToken, upload.single('image'), async (req, res)
             id,
             ...existingData,
             ...updates,
-            image: updates.image || existingData.image,
-            imageUrl: `${req.protocol}://${req.get('host')}/assets/${updates.image || existingData.image}`,
         });
     } catch (e) {
         console.error('Error updating category:', e);
@@ -141,7 +93,6 @@ router.get('/list', verifyToken, async (req, res) => {
             return {
                 id: doc.id,
                 ...data,
-                imageUrl: `${req.protocol}://${req.get('host')}/assets/${data.image}`
             };
         });
         if (snapshot.docs.length > 0) {

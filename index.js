@@ -16,11 +16,13 @@ const index = require('./routers/index');
 const auth = require('./routers/auth');
 const projects = require('./routers/projects');
 const apis = require('./routers/apis');
+const uploadRoute = require('./routers/upload');
 
 app.use('/', index);
 app.use('/api/auth', auth);
 app.use('/api/projects', projects);
 app.use('/api/all', apis);
+app.use('/api/image', uploadRoute);
 app.use("/assets", express.static(__dirname + "/public/assets"));
 
 

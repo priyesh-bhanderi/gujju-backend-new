@@ -21,7 +21,9 @@ app.use('/', index);
 app.use('/api/auth', auth);
 app.use('/api/projects', projects);
 app.use('/api/all', apis);
-app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+// app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+app.use("/assets", express.static(__dirname + "/public/assets"));
+
 
 // console.log("Asset dir files:", fs.readdirSync(path.join(__dirname, "public", "assets")));
 
